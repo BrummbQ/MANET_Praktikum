@@ -13,9 +13,9 @@
 //
 // Wifi 10.1.1.0
 //
-//  *    *    *    *    *    *    *
-//  |    |    |    |    |    |    |
-// n6   n5   n4   n3   n2   n1   n0
+//  *         *     *
+//  |         |     |
+// nnNodes   ...   n0
 //
 
 using namespace ns3;
@@ -26,36 +26,45 @@ int main (int argc, char *argv[]) {
 
 	LogComponentEnable("BulkSendApplication", LOG_LEVEL_INFO);
 
-	// in m
+	// Länge der Netzwerk-Topologie in m
 	unsigned lTopologie = 800;
-	unsigned numberNodes = lTopologie / 50 + 1;
+	//Abstand zweier Knoten in m
+	unsigned deltaX = 50;
 
+	CommandLine cmd;
+	cmd.AddValue ("lTopologie", "Die Länge der Netzwerk-Topologie in m.", lTopologie);
+	cmd.AddValue ("deltaX", "Abstand zweier Knoten in m.", deltaX);
+	cmd.Parse (argc, argv);
+
+
+	// Anzahl Knoten
+	unsigned nNodes = lTopologie / deltaX + 1;
+
+	//Erstellen der Knoten
 	NodeContainer nodes;
-	nodes.Create(numberNodes);
+	nodes.Create(nNodes);
 
 	//Positionen der Knoten definieren
 	MobilityHelper mobility;
 	mobility.SetPositionAllocator("ns3::GridPositionAllocator",
-			"GridWidth", UintegerValue(numberNodes),
+			"GridWidth", UintegerValue(nNodes),
 			"MinX", DoubleValue(0.0),
 			"MinY", DoubleValue(0.0),
-			"DeltaX", DoubleValue(50.0),
+			"DeltaX", DoubleValue(deltaX),
 			"DeltaY", DoubleValue(0.0),
-			"LayoutType", StringValue("ColumnFirst"));
+			"LayoutType", StringValue("RowFirst"));
 	mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
 	mobility.Install(nodes);
 
-
-
-	//AdHoc-Typ festlegen
+	//MAC-Schicht erstellen
 	NqosWifiMacHelper mac = NqosWifiMacHelper::Default();
+	//Adhoc-Typ festlegen
 	mac.SetType("ns3::AdhocWifiMac");
 
 	//Standard Eigenschaften setzen
 	YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
 	YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
 	wifiPhy.SetChannel(wifiChannel.Create());
-
 
 	WifiHelper wifi = WifiHelper::Default();
 	wifi.SetRemoteStationManager("ns3::MinstrelWifiManager");
@@ -80,23 +89,38 @@ int main (int argc, char *argv[]) {
 	Ipv4InterfaceContainer interfaces;
 	interfaces = address.Assign(devices);
 
-	//FTP mit letztem Knoten
-	BulkSendHelper ftp = BulkSendHelper("ns3::TcpSocketFactory",InetSocketAddress (interfaces.GetAddress(numberNodes-1), 9));
-	ftp.SetAttribute("SendSize", UintegerValue(1460));
+	//FTP-Packet an letzten Knoten senden/Port 9
+	BulkSendHelper ftp = BulkSendHelper("ns3::TcpSocketFactory",InetSocketAddress (interfaces.GetAddress(nNodes-1), 9));
+	//Paketgröße festlegen
+	ftp.SetAttribute("MaxBytes", UintegerValue(1460));
 	ApplicationContainer app = ftp.Install(nodes.Get(0));
 	app.Start(Seconds(0.0));
 	app.Stop(Seconds(30.0));
 
-	wifiPhy.EnablePcapAll("output/testWifi");
+	//Eine Senke zum Empfang des FTP-Pakets
+	PacketSinkHelper sink ("ns3::TcpSocketFactory",
+	                         InetSocketAddress (Ipv4Address::GetAny (), 9));
+	ApplicationContainer sinkApps = sink.Install (nodes.Get (nNodes-1));
+	sinkApps.Start (Seconds (0.0));
+	sinkApps.Stop (Seconds (30.0));
+
+	//Tracing aktivieren für alle Devices aller Knoten
+	wifiPhy.EnablePcap("output/testWifi", devices);
+
+	//Routing-Tabelle, nur für Testzwecke
+	Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("output/testwifi.routes", std::ios::out);
+	      aodv.PrintRoutingTableAllEvery (Seconds (2), routingStream);
 
 
+	//Simulation
 	Simulator::Stop(Seconds(30.0));
 
 	Simulator::Run();
 	Simulator::Destroy();
 
-	 Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (app.Get (0));
-	  std::cout << "Total Bytes Received: " << sink1->GetTotalRx () << std::endl;
+	//Ausgabe, wieviel Bytes empfangen werden an der Senke
+	Ptr<PacketSink> sink1 = DynamicCast<PacketSink> (sinkApps.Get (0));
+	std::cout << "Anzahl empfangener Bytes: " << sink1->GetTotalRx () << std::endl;
 
 	return 0;
 }
