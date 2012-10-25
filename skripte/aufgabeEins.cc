@@ -31,7 +31,7 @@ int main (int argc, char *argv[]) {
 	// Abstand zweier Knoten in m
 	unsigned deltaX = 50;
 	// Ausgabe-Ordner für die Tracing-Files
-	std::string outputDir = "gitFiles/output";
+	std::string outputDir = "";
 
 	CommandLine cmd;
 	cmd.AddValue ("lTopologie", "Die Länge der Netzwerk-Topologie in m.", lTopologie);
@@ -117,10 +117,10 @@ int main (int argc, char *argv[]) {
 	sinkApps.Stop (Seconds (30.0));
 
 	//Tracing aktivieren für alle Devices aller Knoten
-	wifiPhy.EnablePcap( outputDir + "/aufgabeEins", devices);
+	wifiPhy.EnablePcap( outputDir + "aufgabeEins", devices);
 
 	//Routing-Tabelle, nur für Testzwecke
-	Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ( outputDir + "/aufgabeEins.routes", std::ios::out);
+	Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ( outputDir + "aufgabeEins.routes", std::ios::out);
 	aodv.PrintRoutingTableAllEvery (Seconds (1), routingStream);
 
 
