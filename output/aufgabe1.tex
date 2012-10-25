@@ -1,0 +1,100 @@
+\documentclass[12pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\setlength{\parindent}{0pt} 
+
+
+\begin{document}
+\title{Praktikum Mobile AdHocNetze\\
+	Aufgabe 1: Experimente im Netzwerk-Simulator NS-3}
+\author{
+Bearbeiter: \and
+	Andy Labitzke, labitzke@studserv.uni-leipzig.de \\ 
+	Gregor Tätzner, wir08ehh@studserv.uni-leipzig.de}
+\date{04.11.2012}
+\maketitle
+\setcounter{page}{1}
+\appendix
+
+\section*{Inhalt}
+In diesem Dokument beschreiben wir die Lösung der 1. Praktikumsaufgabe. Die Gliederung orientiert sich an den einzelnen Unteraufgaben des vorgegebenen Arbeitsblattes.
+
+\setcounter{section}{0}
+
+\section{Laden und kompilieren des NS-3 Package}
+
+Wie in dem Tutorial vorgegeben haben wir die aktuellste Version des NS-3 Simulators installiert. Die Lösungen der weiteren Aufgaben haben wir für diese Version des Simulators entwickelt.
+
+\section{Funktionsweise kennenlernen}
+
+Wir haben das Skript "'first.cc"' entsprechend des Tutorials erweitert und unserer Lösung beigefügt. Es trägt den Namen "'tutorial\_first\_extended.cc"'.
+Nachdem das Skript in den Ordner "'scratch"' der NS-3-Distribution kopiert wurde, kann es mit dem Befehl
+
+\begin{lstlisting}
+./waf --run scratch/myfirst
+\end{lstlisting}
+
+ausgeführt werden. Dabei werden die folgenden Trace-Dateien erzeugt:
+
+\begin{itemize}
+\item myfirst-0-0.pcap
+\item myfirst-1-0.pcap
+\item myfirst.tr
+\end{itemize}
+
+Diese Dateien befinden sich im Ordner "'output"'. Die pcap-Dateien haben wir entsprechend der Anleitungen des Tutorials mittels \textit{tcpdump} ausgewertet. Dazu wurden die folgenden Befehle genutzt:
+
+\begin{lstlisting}
+tcpdump -nn -tt -r myfirst-0-0.pcap
+und
+tcpdump -nn -tt -r myfirst-1-0.pcap
+\end{lstlisting}
+
+Die Ausgaben von \textit{tcpdump} sind in den folgenden Listings zu finden.
+
+\lstinputlisting
+	[caption={Auswertung von myfirst-0-0.pcap}\label{lst:myfirst_1_pcap},
+		captionpos=b,
+		language=bash] %oder TeX für plain
+	{myfirst-0-0.pcap.tcp}
+
+\lstinputlisting
+	[caption={Auswertung von myfirst-1-0.pcap}\label{lst:myfirst_2_pcap},
+		captionpos=b,
+		language=bash] %oder TeX für plain
+	{myfirst-1-0.pcap.tcp}
+
+\section{Eigenes Testszenario}
+
+Für das Testszenario einer Ketten-Topologie mit variabler Länge haben wir das Skript\\ "'aufgabeEins.cc"' erstellt. Nachdem es in den Ordner "'scratch"' der NS-3-Distribution kopiert und gebaut wurde kann es mit dem folgenden Befehl ausgeführt werden:
+
+\begin{lstlisting}
+./waf --run scratch/aufgabeEins --lTopologie=<int>
+\end{lstlisting}
+
+Über den Parameter \textit{lTopologie} kann die Länge der Topologie in Meter angegeben werden.
+Bei der Ausführung wird für jeden Knoten eine pcap-Trace-Datei erstellt, welches die empfangenen und verschickten Nachrichten enthält. Wir haben unserer Lösung einige der pcap-Dateien begefügt, welche bei der Ausführung des Skriptes mit dem Wert \textit{350} für den Parameter \textit{lTopologie} entstanden sind. Diese tragen den Namen "'aufgabeEins-\textit{\textless KnotenNummer\textgreater}-0-pcap"'. 
+In den Dateien sind mehrere Ereignisse festzustellen. Zum einen sind AODV-Nachrichten protokolliert, welche durch das Routing verursacht werden. Dabei sind Anfragen zum Ermitteln der Route zwischen den einzelnen Knoten mit dem Text "'rreq"'  und Mitteilungen von Knoten, dass sie noch vorhanden sind, mit "'rrep"' versehen. 
+Des weiteren finden sich Nachrichten, welche mit dem Kürzel "'ARP"' beginnen. Diese dienen der Ermittlung und Bekanntgabe der MAC-Adressen der an dem FTP-Fluss beteiligten Knoten. Abschließend sind auch noch die für die Auswertung notwendigen TCP-Nachrichten enthalten. Diese sind an dem Text "'Flags"' zu erkennen. Dabei sind Nachrichten, welche für den Aufbau der TCP-Verbindung nötig sind, mit dem Flag "'S"' versehen, während die Nachrichten für den Datentransport und die Bestätigung mit dem Flag "'."' versehen sind.
+
+
+\section{Auswertung der Ergebnisse}
+
+Beispiel für Gnuplot-Eps:
+
+\begin{figure}[h]
+	\centering
+	%\input{sixth}
+	%\includegraphics[width=0.5\textwidth]{../output/cwnd.png}
+	\caption{Titel der Grafik}
+	\label{labelname}
+\end{figure}
+
+
+\end{document}
