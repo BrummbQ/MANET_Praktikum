@@ -9,17 +9,17 @@ BEGIN {
 
   #Anzeichen für Dopplung suchen
   if (int(sequences_max) >= int(substr($9,index($9,":")+1))) {
-       
+
     #auf Dopplung testen
     for (seq in sequences) {
       if (sequences[seq] == $9) {
         next
       }
-   	}
+    }
   } else {
-   		sequences_max=substr($9,index($9,":")+1)
+    sequences_max=substr($9,index($9,":")+1)
   }
-   
+
 
   tcp_packages[int($1)]+=$NF
   sequences[$1]=$9
