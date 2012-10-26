@@ -12,9 +12,6 @@ aufgabe1_setup: $(PROJECT_DIR).cc
 $(PROJECT_DIR).cc:
 	@cp skripte/aufgabeEins.cc $(PROJECT_DIR).cc
 
-simulate_1 =
-
-
 hop_count = $(shell basename "$1" | cut -d"-" -f1)
 
 topo_length = $(shell echo "$1*50" | bc)
@@ -36,5 +33,3 @@ aufgabe1: $(DATS)
 
 clean:
 	@rm -f $(OUTPUTDIR)/*
-
-.PHONY: $(HOPS)
