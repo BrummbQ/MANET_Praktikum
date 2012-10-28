@@ -3,7 +3,7 @@
 PROJECT_DIR := MANET_Praktikum
 OUTPUTDIR := output
 CWD := $(shell pwd)
-DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 4-Hop.dat 8-Hop.dat)
+DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
 
 aufgabe1: aufgabe1_run tutorial1 doc
 
@@ -33,7 +33,8 @@ $(DATS): $(OUTPUTDIR)/%.dat: aufgabe1_setup
 
 aufgabe1_run: $(DATS)
 	DAT1=output/1-Hop.dat DAT4=output/4-Hop.dat DAT8=output/8-Hop.dat gnuplot skripte/graph1.plt
-	DAT1=output/1-Hop-Sum.dat DAT4=output/4-Hop-Sum.dat DAT8=output/8-Hop-Sum.dat gnuplot skripte/graph2.plt
+	DAT1=output/1-Hop-Sum.dat DAT2=output/2-Hop-Sum.dat DAT3=output/3-Hop-Sum.dat DAT4=output/4-Hop-Sum.dat \
+	DAT5=output/5-Hop-Sum.dat DAT6=output/6-Hop-Sum.dat DAT7=output/7-Hop-Sum.dat DAT8=output/8-Hop-Sum.dat gnuplot skripte/graph2.plt
 	@rm -f $(PROJECT_DIR).cc
 
 tutorial1:
