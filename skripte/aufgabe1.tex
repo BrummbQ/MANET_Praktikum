@@ -78,7 +78,7 @@ Für das Testszenario einer Ketten-Topologie mit variabler Länge haben wir das 
 make aufgabe1
 \end{lstlisting}
 
-Hinweis: Dabei sollte sich das Tool "'waf"' im Ausführungspfad befinden. Das Makefile führt mehrere Simulationen mit verschiedener Hop-Anzahl durch. Dabei wird die jeweilige Topologielänge berechnet und ueber den Parameter \textit{lTopologie} angegeben. Bei der Ausführung wird für jeden Knoten eine pcap-Trace-Datei erstellt, welches die empfangenen und verschickten Nachrichten enthält. Wir haben unserer Lösung einige der pcap-Dateien begefügt, welche bei der Ausführung des Skriptes mit dem Wert \textit{400} für den Parameter \textit{lTopologie} entstanden sind. Diese tragen den Namen "'aufgabeEins-\textit{\textless KnotenNummer\textgreater}-0-pcap"'. 
+Hinweis: Dabei sollte sich das Tool "'waf"' im Ausführungspfad befinden. Das Makefile führt nun mehrere Simulationen mit verschiedener Hop-Anzahl durch. Dabei wird die jeweilige Topologielänge berechnet und über dem Parameter \textit{lTopologie} dem Skript übergeben. Bei der Ausführung wird für jeden Knoten eine pcap-Trace-Datei erstellt, welches die empfangenen und verschickten Nachrichten enthält. Wir haben unserer Lösung einige der pcap-Dateien begefügt, welche bei der Ausführung des Skriptes mit dem Wert \textit{400} für den Parameter \textit{lTopologie} entstanden sind. Diese tragen den Namen "'aufgabeEins-\textit{\textless KnotenNummer\textgreater}-0-pcap"'. 
 In den Dateien sind mehrere Ereignisse festzustellen. Zum einen sind AODV-Nachrichten protokolliert, welche durch das Routing verursacht werden. Dabei sind Anfragen zum Ermitteln der Route zwischen den einzelnen Knoten mit dem Text "'rreq"'  und Mitteilungen von Knoten, dass sie noch vorhanden sind, mit "'rrep"' versehen. 
 Des weiteren finden sich Nachrichten, welche mit dem Kürzel "'ARP"' beginnen. Diese dienen der Ermittlung und Bekanntgabe der MAC-Adressen der an dem FTP-Fluss beteiligten Knoten. Abschließend sind auch noch die für die Auswertung notwendigen TCP-Nachrichten enthalten. Diese sind an dem Text "'Flags"' zu erkennen. Dabei sind Nachrichten, welche für den Aufbau der TCP-Verbindung nötig sind, mit dem Flag "'S"' versehen, während die Nachrichten für den Datentransport und die Bestätigung mit dem Flag "'."' versehen sind.
 
@@ -104,5 +104,7 @@ Nach dem Durchlauf des Skriptes erhalten wir folgendes Ergebnis:
 \end{figure}
 
 Offensichtlich ist die Höhe des Datendurchsatzes direkt von der Anzahl der Hops bzw. Knoten abängig. Dabei gilt: Je mehr Knoten die Datenpakete durchlaufen müssen, desto langsamer ist die Verbindung.
+
+Auch die Abbildung \ref{Durchsatz2} bestätigt dieses Bild. Der mittlere Durchsatz ist mit über 1400 kB/s bei einem Hop mit Abstand am größten.
 
 \end{document}
