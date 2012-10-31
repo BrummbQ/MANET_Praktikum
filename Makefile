@@ -5,7 +5,9 @@ OUTPUTDIR := output
 CWD := $(shell pwd)
 DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
 
-aufgabe1: aufgabe1_run tutorial1 doc
+all: aufgabe1 tutorial1 doc
+
+aufgabe1: aufgabe1_run
 
 aufgabe1_setup: $(PROJECT_DIR).cc
 	@echo "Building simulation aufgabe1"
@@ -15,6 +17,7 @@ $(PROJECT_DIR).cc:
 	@cp skripte/aufgabeEins.cc $(PROJECT_DIR).cc
 
 $(OUTPUTDIR)/aufgabe1.pdf:
+	@pdflatex --output-directory=$(OUTPUTDIR) skripte/aufgabe1.tex
 	@pdflatex --output-directory=$(OUTPUTDIR) skripte/aufgabe1.tex
 
 hop_count = $(shell basename "$1" | cut -d"-" -f1)
