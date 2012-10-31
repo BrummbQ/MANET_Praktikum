@@ -16,7 +16,15 @@ $(PROJECT_DIR).cc:
 
 $(OUTPUTDIR)/aufgabe1.pdf:
 	@pdflatex --output-directory=$(OUTPUTDIR) skripte/aufgabe1.tex
+	@pdflatex --output-directory=$(OUTPUTDIR) skripte/aufgabe1.tex
 	@rm -f $(OUTPUTDIR)/{aufgabe1.aux,aufgabe1.log}
+
+$(OUTPUTDIR)/throughput.png: $(DATS)
+	DAT1=output/1-Hop.dat DAT4=output/4-Hop.dat DAT8=output/8-Hop.dat gnuplot skripte/graph1.plt
+
+$(OUTPUTDIR)/total.png: $(DATS)
+	DAT1=output/1-Hop-Sum.dat DAT2=output/2-Hop-Sum.dat DAT3=output/3-Hop-Sum.dat DAT4=output/4-Hop-Sum.dat \
+	DAT5=output/5-Hop-Sum.dat DAT6=output/6-Hop-Sum.dat DAT7=output/7-Hop-Sum.dat DAT8=output/8-Hop-Sum.dat gnuplot skripte/graph2.plt
 
 hop_count = $(shell basename "$1" | cut -d"-" -f1)
 
@@ -33,9 +41,6 @@ $(DATS): $(OUTPUTDIR)/%.dat:
 	@TOTAL=$$(cat $@ | grep "Total" | cut -d" " -f 4) ; echo "$(call hop_count,$@) $$TOTAL" > $(OUTPUTDIR)/$(call hop_count,$@)-Hop-Sum.dat
 
 aufgabe1: aufgabe1_setup $(DATS)
-	DAT1=output/1-Hop.dat DAT4=output/4-Hop.dat DAT8=output/8-Hop.dat gnuplot skripte/graph1.plt
-	DAT1=output/1-Hop-Sum.dat DAT2=output/2-Hop-Sum.dat DAT3=output/3-Hop-Sum.dat DAT4=output/4-Hop-Sum.dat \
-	DAT5=output/5-Hop-Sum.dat DAT6=output/6-Hop-Sum.dat DAT7=output/7-Hop-Sum.dat DAT8=output/8-Hop-Sum.dat gnuplot skripte/graph2.plt
 	@rm -f $(PROJECT_DIR).cc
 
 tutorial1:
@@ -47,7 +52,7 @@ tutorial1:
 	done
 	@rm $(PROJECT_DIR).cc
 
-doc: $(OUTPUTDIR)/aufgabe1.pdf
+doc: $(OUTPUTDIR)/throughput.png $(OUTPUTDIR)/total.png $(OUTPUTDIR)/aufgabe1.pdf
 
 clean:
 	@rm -f $(OUTPUTDIR)/*
