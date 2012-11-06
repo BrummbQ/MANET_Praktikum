@@ -2,8 +2,14 @@
 
 PROJECT_DIR := MANET_Praktikum
 OUTPUTDIR := output
+RESDIR := ressources
 CWD := $(shell pwd)
 DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
+SRCVIDS := highway_cif.264 #bridge-far_cif.264
+YUVS := $(addprefix $(OUTPUTDIR)/,$(subst .264,.yuv,$(SRCVIDS)))
+x264 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.x264,$(SRCVIDS)))
+MP4 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4,$(SRCVIDS)))
+MP4TRACE := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4trace,$(SRCVIDS)))
 
 all: aufgabe1 tutorial1 doc
 
@@ -25,6 +31,22 @@ $(OUTPUTDIR)/throughput.png: $(DATS)
 $(OUTPUTDIR)/total.png: $(DATS)
 	DAT1=output/1-Hop-Sum.dat DAT2=output/2-Hop-Sum.dat DAT3=output/3-Hop-Sum.dat DAT4=output/4-Hop-Sum.dat \
 	DAT5=output/5-Hop-Sum.dat DAT6=output/6-Hop-Sum.dat DAT7=output/7-Hop-Sum.dat DAT8=output/8-Hop-Sum.dat gnuplot skripte/graph2.plt
+
+$(YUVS): $(addprefix $(RESDIR)/,$(SRCVIDS))
+	ffmpeg -i $< $@
+
+$(x264): $(YUVS)
+	x264 -I 30 -B 64 --fps 30 -o $@ --input-res 352x288 $<
+
+$(MP4): $(x264)
+	MP4Box -hint -mtu 1024 -fps 30 -add $< $@
+	ffmpeg -i $@ $(subst .mp4,-ref.yuv,$@)
+
+$(MP4TRACE): $(MP4)
+	nc -l -u localhost 12346 > /dev/null &
+	@echo "You can trace the traffic with (run as root):  tcpdump -i lo -n -tt -v udp port 12346 > a01"
+	bin/mp4trace -f -s localhost 12346 $< > $@
+	killall nc
 
 hop_count = $(shell basename "$1" | cut -d"-" -f1)
 
@@ -51,6 +73,11 @@ tutorial1:
 		tcpdump -ttnn -r $$file > $$file.tcpdump; \
 	done
 	@rm $(PROJECT_DIR).cc
+
+aufgabe2: $(MP4TRACE)
+
+aufgabe2_evaluate:
+
 
 doc: $(OUTPUTDIR)/throughput.png $(OUTPUTDIR)/total.png $(OUTPUTDIR)/aufgabe1.pdf
 
