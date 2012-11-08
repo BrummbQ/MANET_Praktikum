@@ -74,7 +74,20 @@ tutorial1:
 	done
 	@rm $(PROJECT_DIR).cc
 
-aufgabe2: $(MP4TRACE)
+aufgabe2_setup: 
+	@cp skripte/aufgabeZwei.cc $(PROJECT_DIR).cc
+	@cp skripte/evalvid-udp-send-application.cc evalvid-udp-send-application.cc
+	@cp skripte/evalvid-udp-send-application.h evalvid-udp-send-application.h
+	@waf
+
+aufgabe2: aufgabe2_setup $(MP4TRACE)
+	@waf --run "$(PROJECT_DIR) --mp4TraceDatei=$(CWD)/$(MP4TRACE) --outputDir=$(CWD)/$(OUTPUTDIR)/"
+	@for file in output/*.pcap; do \
+		tcpdump -ttnn -r $$file > $$file.tcpdump; \
+	done
+	@rm $(PROJECT_DIR).cc
+	@rm evalvid-udp-send-application.cc
+	@rm evalvid-udp-send-application.h
 
 aufgabe2_evaluate:
 

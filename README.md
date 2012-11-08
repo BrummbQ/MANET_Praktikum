@@ -5,5 +5,5 @@ A1)
 - you can find the generated documentation in the output folder: output/aufgabe1.pdf
 
 A2)
-prerequisites: gpac, x264, x86_32 glibc
+prerequisites: gpac, x264, x86_32 glibc, ffmpeg
 - run 'make aufgabe1'
