@@ -7,7 +7,8 @@ RESDIR := ressources
 BINDIR := $(CWD)/bin
 
 # exersise 1
-DATS := $(addprefix $(OUTPUTDIR)/,8-Hop.dat) #1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
+# FIXME: 1-2 Hop
+DATS := $(addprefix $(OUTPUTDIR)/,3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
 
 # exersise 2
 SRCVIDS := akiyo_cif.264 #highway_cif.264 #bridge-far_cif.264
@@ -15,10 +16,10 @@ YUVS := $(addprefix $(OUTPUTDIR)/,$(subst .264,.yuv,$(SRCVIDS)))
 x264 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.x264,$(SRCVIDS)))
 MP4 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4,$(SRCVIDS)))
 MP4TRACE := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4trace,$(SRCVIDS)))
-ETMP4MP4 := $(subst .dat,$(subst .264,-etmp4.mp4,$(SRCVIDS)),$(DATS))
+ETMP4MP4 := $(foreach hop,$(DATS),$(foreach file,$(SRCVIDS),$(subst .dat,-$(subst .264,-etmp4.mp4,$(file)),$(hop))))
 PSNRS := $(subst .mp4,.psnr,$(ETMP4MP4))
 ETMP4YUF := $(subst .mp4,.yuv,$(ETMP4MP4))
-SUM_PSNRS := $(subst .mp4,-sum.psnr,$(ETMP4MP4))
+MEAN_PSNR_PNG := $(addprefix $(OUTPUTDIR)/,$(subst .264,.psnr.png,$(SRCVIDS)))
 
 hop_count = $(shell basename "$1" | cut -d"-" -f1)
 topo_length = $(shell echo "$1*50" | bc)
@@ -42,38 +43,46 @@ $(OUTPUTDIR)/total.png: $(DATS)
 	DAT1=output/1-Hop-Sum.dat DAT2=output/2-Hop-Sum.dat DAT3=output/3-Hop-Sum.dat DAT4=output/4-Hop-Sum.dat \
 	DAT5=output/5-Hop-Sum.dat DAT6=output/6-Hop-Sum.dat DAT7=output/7-Hop-Sum.dat DAT8=output/8-Hop-Sum.dat gnuplot skripte/graph2.plt
 
-$(YUVS): $(addprefix $(RESDIR)/,$(SRCVIDS))
+$(YUVS): $(OUTPUTDIR)/%.yuv: $(RESDIR)/%.264
 	ffmpeg -i $< $@
 
-$(x264): $(YUVS)
+$(x264): $(OUTPUTDIR)/%.x264: $(OUTPUTDIR)/%.yuv
 	x264 -I 30 -B 64 --fps 30 -o $@ --input-res 352x288 $<
 
-$(MP4): $(x264)
+$(MP4): $(OUTPUTDIR)/%.mp4: $(OUTPUTDIR)/%.x264
 	MP4Box -hint -mtu 1024 -fps 30 -add $< $@
 	ffmpeg -i $@ $(subst .mp4,-ref.yuv,$@)
 
-$(MP4TRACE): $(MP4)
+$(MP4TRACE): $(OUTPUTDIR)/%.mp4trace: $(OUTPUTDIR)/%.mp4
 	nc -l -u localhost 12346 > /dev/null &
 	@echo "You can trace the traffic with (run as root):  tcpdump -i lo -n -tt -v udp port 12346 > a01"
 	$(BINDIR)/mp4trace -f -s localhost 12346 $< > $@
 	killall nc
 
-$(ETMP4MP4): $(MP4TRACE)
+$(ETMP4MP4): $(OUTPUTDIR)/%.mp4: $(MP4TRACE)
 	waf --run "$(PROJECT_DIR) --lTopologie=$(call topo_length, $(call hop_count,$@)) --mp4TraceDatei=$< --outputDir=$(OUTPUTDIR)/"
 	FILES=(output/aufgabeZwei*.pcap) && \
-	tcpdump -ntt -v -r $${FILES[0]} > $(basename $<)_s.tcpdump && \
-	tcpdump -ntt -v -r $${FILES[$${#FILES[@]}-1]} > $(basename $<)_r.tcpdump
+	tcpdump -n -tt -v -r $${FILES[0]} > $(basename $<)_s.tcpdump && \
+	tcpdump -n -tt -v -r $${FILES[$${#FILES[@]}-1]} > $(basename $<)_r.tcpdump
 	cd $(OUTPUTDIR) && \
 	$(BINDIR)/etmp4 -F -x $(basename $<)_s.tcpdump $(basename $<)_r.tcpdump $< $(subst .mp4trace,.mp4,$<) $(basename $(notdir $@))
+	rm -f $(OUTPUTDIR)/{*.pcap,*.tcpdump}
 
-$(ETMP4YUF): $(ETMP4MP4)
+$(ETMP4YUF): $(OUTPUTDIR)/%.yuv: $(OUTPUTDIR)/%.mp4
 	ffmpeg -i $< $@
 
-$(PSNRS): $(ETMP4YUF)
-	$(BINDIR)/psnr 352 288 420 $(subst .etmp4,,$<) $< > $@
+orig = $(OUTPUTDIR)/$(shell echo $(notdir $(subst -etmp4,,$1)) | cut -d - -f3)
 
-$(SUM_PSNRS): $(PSNRS)
-	@skripte/sum-psnr.awk $< > $@
+$(PSNRS): $(OUTPUTDIR)/%.psnr: $(OUTPUTDIR)/%.yuv
+	$(BINDIR)/psnr 352 288 420 $(call orig,$<) $< > $@
+	@echo "$(call hop_count,$(notdir $<)) `skripte/sum-psnr.awk $@`" > $@.mean
+
+mean = $(OUTPUTDIR)/$2-Hop-$(notdir $(subst .psnr.png,-etmp4.psnr.mean,$1))
+
+$(MEAN_PSNR_PNG): $(OUTPUTDIR)/%.psnr.png: $(PSNRS)
+	FILE3=$(call mean,$@,3) FILE4=$(call mean,$@,4) \
+	FILE5=$(call mean,$@,5) FILE6=$(call mean,$@,6) \
+	FILE7=$(call mean,$@,7) FILE8=$(call mean,$@,8) OUTPUT=$@ gnuplot skripte/a2_graph1.plt
 
 $(DATS): $(OUTPUTDIR)/%.dat:
 	@echo "Running simulation $@"
@@ -97,7 +106,7 @@ tutorial1:
 	done
 	@rm $(PROJECT_DIR).cc
 
-aufgabe2: aufgabe2_setup $(SUM_PSNRS)
+aufgabe2: aufgabe2_setup $(PSNRS) $(MEAN_PSNR_PNG)
 	@rm $(PROJECT_DIR).cc
 	@rm evalvid-udp-send-application.cc
 	@rm evalvid-udp-send-application.h
