@@ -159,7 +159,7 @@ void EvalVidUdpSendApplication::Send( int nByte ) {
 	//Udp-Header vor die Daten hängen
 	SeqTsHeader seqTs;
 	seqTs.SetSeq( m_sent );
-	Ptr<Packet> p = Create<Packet>( nByte + ( 8 + 4 ) ); // 8+4 : the size of the seqTs header
+	Ptr<Packet> p = Create<Packet>( nByte - ( 8 + 4 ) ); // 8+4 : the size of the seqTs header
 	p->AddHeader( seqTs );
 
 	std::stringstream peerAddressStringStream;
