@@ -34,7 +34,8 @@ EvalVidUdpSendApplication::EvalVidUdpSendApplication():
 		m_socket(0),
 		m_sent(0),
 		nFrames(0),
-		nAktuellesFrame(0)
+		nAktuellesFrame(0),
+		nAktuellePaketanzahl(1)
 {
 	NS_LOG_FUNCTION_NOARGS ();
 	m_sendEvent = EventId ();
@@ -140,8 +141,11 @@ void EvalVidUdpSendApplication::SendeDaten() {
 	//teste ob schon alle Pakete gesendet wurden
 	if( nAktuellesFrame < nFrames - 1 ) {
 
-		//nächstes Frame holen
-		GetFrame(++nAktuellesFrame, aktuellesFrame);
+		if (nAktuellePaketanzahl++ == aktuellesFrame.anzahl) {
+			//nächstes Frame holen
+			GetFrame(++nAktuellesFrame, aktuellesFrame);
+			nAktuellePaketanzahl = 1;
+		}
 
 		Time sendeZeit = aktuellesFrame.zeit - zeitLetztesFrame;
 

@@ -81,7 +81,7 @@ private:
 	EventId m_sendEvent;
 	// Anzahl aller Frames der mp4Trace-Datei
 	// Nummer des aktuell zu sendenden Frames
-	unsigned int nFrames , nAktuellesFrame ;
+	unsigned int nFrames , nAktuellesFrame, nAktuellePaketanzahl ;
 	// Zeiger auf Array, welches alle Frames des Trace enthält
 	frame* trace;
 	// Frame, welches gerade gesendet wird
