@@ -2,7 +2,8 @@ set terminal png
 
 set xlabel "Hop count"
 set ylabel "PSNR"
-set xrange [0:9]
+set xrange [0:]
+set yrange [0:]
 set boxwidth 0.8
 set style fill solid 1.0
 

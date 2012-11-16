@@ -20,7 +20,7 @@ TCPDUMP := tcpdump
 DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
 
 # exersise 2
-SRCVIDS := akiyo_cif.264 #highway_cif.264 #bridge-far_cif.264
+SRCVIDS := bridge-far_cif.264 #highway_cif.264
 YUVS := $(addprefix $(OUTPUTDIR)/,$(subst .264,.yuv,$(SRCVIDS)))
 x264 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.x264,$(SRCVIDS)))
 MP4 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4,$(SRCVIDS)))
@@ -28,7 +28,7 @@ MP4TRACES := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4trace,$(SRCVIDS)))
 ETMP4MP4 := $(foreach hop,$(DATS),$(foreach file,$(SRCVIDS),$(subst .dat,-$(subst .264,-etmp4.mp4,$(file)),$(hop))))
 PSNRS := $(subst .mp4,.psnr,$(ETMP4MP4))
 ETMP4YUF := $(subst .mp4,.yuv,$(ETMP4MP4))
-MEAN_PSNR_PNG := $(addprefix $(OUTPUTDIR)/,$(subst .264,.psnr.png,$(SRCVIDS)))
+MEAN_PSNR_PNG := $(addprefix $(OUTPUTDIR)/,$(subst .264,-psnr.png,$(SRCVIDS)))
 
 hop_count = $(shell basename "$1" | cut -d"-" -f1)
 topo_length = $(shell echo "$1*50" | bc)
@@ -43,6 +43,11 @@ aufgabe1_setup: $(PROJECT_DIR).cc
 $(OUTPUTDIR)/aufgabe1.pdf:
 	$(PDFLATEX) --output-directory=$(OUTPUTDIR) skripte/aufgabe1.tex
 	$(PDFLATEX) --output-directory=$(OUTPUTDIR) skripte/aufgabe1.tex
+	@rm -f $(OUTPUTDIR)/{aufgabe1.aux,aufgabe1.log}
+
+$(OUTPUTDIR)/aufgabe2.pdf: $(MEAN_PSNR_PNG)
+	$(PDFLATEX) --output-directory=$(OUTPUTDIR) skripte/aufgabe2.tex
+	$(PDFLATEX) --output-directory=$(OUTPUTDIR) skripte/aufgabe2.tex
 	@rm -f $(OUTPUTDIR)/{aufgabe1.aux,aufgabe1.log}
 
 $(OUTPUTDIR)/throughput.png: $(DATS)
@@ -67,15 +72,17 @@ $(MP4TRACES): $(OUTPUTDIR)/%.mp4trace: $(OUTPUTDIR)/%.mp4
 	$(MP4TRACE) -f -s localhost 12346 $< > $@
 	killall nc
 
+select_mp4trace = $(OUTPUTDIR)/$(subst -etmp4.mp4,,$(shell echo $(notdir $1) | cut -d "-" -f3-))
+
 $(ETMP4MP4): $(OUTPUTDIR)/%.mp4: $(MP4TRACES)
-	$(WAF) --run "$(PROJECT_DIR) --lTopologie=$(call topo_length, $(call hop_count,$@)) --mp4TraceDatei=$< --outputDir=$(OUTPUTDIR)/"
+	$(WAF) --run "$(PROJECT_DIR) --lTopologie=$(call topo_length, $(call hop_count,$@)) --mp4TraceDatei=$(call select_mp4trace,$@).mp4trace --outputDir=$(OUTPUTDIR)/"
 	FILES=(output/aufgabeZwei*.pcap) && \
-	$(TCPDUMP) -n -tt -v -r $${FILES[0]} > $(basename $<)_s.tcpdump.raw && \
-	$(TCPDUMP) -n -tt -v -r $${FILES[$${#FILES[@]}-1]} > $(basename $<)_r.tcpdump.raw && \
-	skripte/delete_aodv.awk $(basename $<)_s.tcpdump.raw > $(basename $<)_s.tcpdump && \
-	skripte/delete_aodv.awk $(basename $<)_r.tcpdump.raw > $(basename $<)_r.tcpdump
+	$(TCPDUMP) -n -tt -v -r $${FILES[0]} > $(basename $(call select_mp4trace,$@))_s.tcpdump.raw && \
+	$(TCPDUMP) -n -tt -v -r $${FILES[$${#FILES[@]}-1]} > $(basename $(call select_mp4trace,$@))_r.tcpdump.raw && \
+	skripte/delete_aodv.awk $(basename $(call select_mp4trace,$@))_s.tcpdump.raw > $(basename $(call select_mp4trace,$@))_s.tcpdump && \
+	skripte/delete_aodv.awk $(basename $(call select_mp4trace,$@))_r.tcpdump.raw > $(basename $(call select_mp4trace,$@))_r.tcpdump
 	cd $(OUTPUTDIR) && \
-	$(ETMP4) -F -x $(basename $<)_s.tcpdump $(basename $<)_r.tcpdump $< $(subst .mp4trace,.mp4,$<) $(basename $(notdir $@))
+	$(ETMP4) -F -x $(basename $(call select_mp4trace,$@))_s.tcpdump $(basename $(call select_mp4trace,$@))_r.tcpdump $(call select_mp4trace,$@).mp4trace $(subst .mp4trace,.mp4,$(call select_mp4trace,$@).mp4trace) $(basename $(notdir $@)) >/dev/null 2>&1
 	rm -f $(OUTPUTDIR)/*.pcap
 
 $(ETMP4YUF): $(OUTPUTDIR)/%.yuv: $(OUTPUTDIR)/%.mp4
@@ -87,9 +94,9 @@ $(PSNRS): $(OUTPUTDIR)/%.psnr: $(OUTPUTDIR)/%.yuv
 	$(PSNR) 352 288 420 $(call orig,$<) $< > $@
 	@echo "$(call hop_count,$(notdir $<)) `skripte/sum-psnr.awk $@`" > $@.mean
 
-mean = $(OUTPUTDIR)/$2-Hop-$(notdir $(subst .psnr.png,-etmp4.psnr.mean,$1))
+mean = $(OUTPUTDIR)/$2-Hop-$(notdir $(subst -psnr.png,-etmp4.psnr.mean,$1))
 
-$(MEAN_PSNR_PNG): $(OUTPUTDIR)/%.psnr.png: $(PSNRS)
+$(MEAN_PSNR_PNG): $(OUTPUTDIR)/%-psnr.png: $(PSNRS)
 	FILE1=$(call mean,$@,1) FILE2=$(call mean,$@,2) \
 	FILE3=$(call mean,$@,3) FILE4=$(call mean,$@,4) \
 	FILE5=$(call mean,$@,5) FILE6=$(call mean,$@,6) \
@@ -117,7 +124,7 @@ tutorial1:
 	done
 	@rm $(PROJECT_DIR).cc
 
-aufgabe2: aufgabe2_setup $(PSNRS) $(MEAN_PSNR_PNG)
+aufgabe2: aufgabe2_setup $(MEAN_PSNR_PNG)
 	@rm $(PROJECT_DIR).cc
 	@rm evalvid-udp-send-application.cc
 	@rm evalvid-udp-send-application.h
@@ -129,6 +136,8 @@ aufgabe2_setup:
 	$(WAF)
 
 doc: $(OUTPUTDIR)/throughput.png $(OUTPUTDIR)/total.png $(OUTPUTDIR)/aufgabe1.pdf
+
+doc2: $(OUTPUTDIR)/aufgabe2.pdf
 
 clean:
 	@rm -f $(OUTPUTDIR)/*

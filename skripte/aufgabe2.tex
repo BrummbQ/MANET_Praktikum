@@ -1,0 +1,79 @@
+\documentclass[12pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\lstset{frame=trBL}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\setlength{\parindent}{0pt} 
+
+
+\begin{document}
+\title{Praktikum Mobile AdHocNetze\\
+	Aufgabe 2: Realisierung von Video-Streaming über NS-3}
+\author{
+Bearbeiter: \and
+	Andy Labitzke, labitzke@studserv.uni-leipzig.de \\ 
+	Gregor Tätzner, wir08ehh@studserv.uni-leipzig.de}
+\date{25.11.2012}
+\maketitle
+\setcounter{page}{1}
+\appendix
+
+\section*{Inhalt}
+In diesem Dokument beschreiben wir die Lösung der 2. Praktikumsaufgabe. Die Gliederung orientiert sich an den einzelnen Unteraufgaben des vorgegebenen Arbeitsblattes.
+
+\setcounter{section}{0}
+
+\section{Laden und kompilieren des NS-3 Package}
+
+Wie in dem Tutorial vorgegeben haben wir die aktuellste Version des NS-3 Simulators installiert und konfiguriert. Die Lösungen der weiteren Aufgaben haben wir für diese Version des Simulators entwickelt und in dem Unterordner "'skripte"' zur Verfügung gestellt. Für die Ausführung der Skripte ist es nötig den gesamten Projektordner "'MANET\_Praktikum"' in den Ordner "'scratch"' der NS-3-Distribution zu kopieren.
+
+\begin{center}
+Hinweis: Falls der Ordner "'output"' nicht leer sein sollte, muss zuerst "'make clean"' aufgerufen werden, bevor eine neue Simulation gestartet werden kann.
+\end{center}
+
+Die gesamte Simulation kann mit dem Befehl
+\begin{lstlisting}
+make aufgabe2
+\end{lstlisting}
+durchgefuehrt werden.
+
+\begin{center}
+Hinweis: Beachten Sie die Systemvorraussetzungen in der Datei README.md.
+\end{center}
+
+\section{Lokales Videostreaming mit mp4trace}
+
+Aus den Quelldateien im Verzeichnis "'ressources"' werden zunaechst mp4-Dateien erstellt. Diese werden danach mittels dem Tool "'mp4trace"' zu einem lokalen UDP Port gestreamt.
+
+\section{Versenden der Daten im NS3-Simulator}
+
+Die NS3-Applikation "'skripte/evalvid-udp-send-application.cpp"' liest nun den Output von mp4trace ein und stellt einen Datenversand ueber 2 bis 9 Stationen nach.
+
+"'etmp4"' nutzt daraufhin die bisher erzeugten Dateien und das Originalvideo, um daraus eine mp4 Videodatei zu rekonstruieren. Als Qualitätsmaß wird der PSNR mit dem gleichnamigen Tool "'psnr"' ermittelt. Die grafische Repraesentation dieses Ergebnisses ist auf den folgenden Abbildungen zu sehen.
+
+\section{Auswertung der Ergebnisse}
+
+\begin{figure}[h]
+	\centering
+% 	\input{sixth}
+	\includegraphics[width=0.5\textwidth]{output/highway_cif-psnr}
+	\caption{PSNR fuer das Video highway\_cif}
+	\label{fig:Durchsatz}
+\end{figure}
+
+% \begin{figure}[h]
+% 	\centering
+% % 	\input{sixth}
+% 	\includegraphics[width=0.5\textwidth]{output/bridge-far_cif-psnr}
+% 	\caption{PSNR fuer das Video bridge-far\_cif}
+% 	\label{fig:Durchsatz2}
+% \end{figure}
+
+Die Qualität der Videos fällt mit zunehmender Topologielaenge ab. Über je mehr Stationen das Video gestreamt wird, desto mehr Frames gehen verloren. Da wir als Übertragungsprotokoll UDP verwenden, findet auch keine Fehlerbehandlung statt.
+
+\end{document}
