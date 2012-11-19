@@ -17,10 +17,10 @@ WAF := waf
 TCPDUMP := tcpdump
 
 # exersise 1
-DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat)
+DATS := $(addprefix $(OUTPUTDIR)/,1-Hop.dat 2-Hop.dat 3-Hop.dat 4-Hop.dat 5-Hop.dat 6-Hop.dat 7-Hop.dat 8-Hop.dat) 
 
 # exersise 2
-SRCVIDS := bridge-far_cif.264 #highway_cif.264
+SRCVIDS := highway_cif.264 bridge_far_cif.264 
 YUVS := $(addprefix $(OUTPUTDIR)/,$(subst .264,.yuv,$(SRCVIDS)))
 x264 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.x264,$(SRCVIDS)))
 MP4 := $(addprefix $(OUTPUTDIR)/,$(subst .264,.mp4,$(SRCVIDS)))
@@ -133,6 +133,8 @@ aufgabe2_setup:
 	@cp skripte/aufgabeZwei.cc $(PROJECT_DIR).cc
 	@cp skripte/evalvid-udp-send-application.cc evalvid-udp-send-application.cc
 	@cp skripte/evalvid-udp-send-application.h evalvid-udp-send-application.h
+	#da später als delimiter das Minus genutzt wird muss dieses im Dateinamen ersetzt werden
+	$(shell rename bridge-far bridge_far ressources/bridge-far_cif.264)
 	$(WAF)
 
 doc: $(OUTPUTDIR)/throughput.png $(OUTPUTDIR)/total.png $(OUTPUTDIR)/aufgabe1.pdf

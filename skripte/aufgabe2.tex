@@ -48,11 +48,18 @@ Hinweis: Beachten Sie die Systemvorraussetzungen in der Datei README.md.
 
 \section{Lokales Videostreaming mit mp4trace}
 
-Aus den Quelldateien im Verzeichnis "'ressources"' werden zunaechst mp4-Dateien erstellt. Diese werden danach mittels dem Tool "'mp4trace"' zu einem lokalen UDP Port gestreamt.
+Aus den Quelldateien im Verzeichnis "'ressources"' wird zunächst ein MP4 mit H.264-Kodierung erstellt. Dabei sind folgende Schritte notwendig:
+\begin{enumerate}
+\item Erzeugung der YUV-Datei
+\item Kompriermierung mit x264
+\item Erzeugung der MP4-Datei mit MP4Box
+\end{enumerate}
+Die MP4-Dateien werden danach mittels dem Tool "'mp4trace"' zu einem lokalen UDP Port gestreamt.
+
 
 \section{Versenden der Daten im NS3-Simulator}
 
-Die NS3-Applikation "'skripte/evalvid-udp-send-application.cpp"' liest nun den Output von mp4trace ein und stellt einen Datenversand ueber 2 bis 9 Stationen nach.
+Das Skript für den NS3-Simulator befindet sich unter "'skripte/aufgabe2.cpp"'. Dieses entspricht dem Skript aus Aufgabe 1c , mit der Änderungen, dass statt einer BulkSend-Applikation eine eigens dafür geschriebene UDP-Applikation für den Versand der Frames verwendet wird (siehe "'skripte/evalvid-udp-send-application.cc"'). Diese liest den Output von mp4trace ein und stellt einen Datenversand ueber 2 bis 9 Stationen nach.
 
 "'etmp4"' nutzt daraufhin die bisher erzeugten Dateien und das Originalvideo, um daraus eine mp4 Videodatei zu rekonstruieren. Als Qualitätsmaß wird der PSNR mit dem gleichnamigen Tool "'psnr"' ermittelt. Die grafische Repraesentation dieses Ergebnisses ist auf den folgenden Abbildungen zu sehen.
 
@@ -66,13 +73,13 @@ Die NS3-Applikation "'skripte/evalvid-udp-send-application.cpp"' liest nun den O
 	\label{fig:Durchsatz}
 \end{figure}
 
-% \begin{figure}[h]
-% 	\centering
-% % 	\input{sixth}
-% 	\includegraphics[width=0.5\textwidth]{output/bridge-far_cif-psnr}
-% 	\caption{PSNR fuer das Video bridge-far\_cif}
-% 	\label{fig:Durchsatz2}
-% \end{figure}
+\begin{figure}[h]
+ 	\centering
+% 	\input{sixth}
+ 	\includegraphics[width=0.5\textwidth]{output/bridge_far_cif-psnr}
+ 	\caption{PSNR fuer das Video bridge-far\_cif}
+ 	\label{fig:Durchsatz2}
+\end{figure}
 
 Die Qualität der Videos fällt mit zunehmender Topologielaenge ab. Über je mehr Stationen das Video gestreamt wird, desto mehr Frames gehen verloren. Da wir als Übertragungsprotokoll UDP verwenden, findet auch keine Fehlerbehandlung statt.
 

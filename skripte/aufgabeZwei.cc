@@ -32,16 +32,19 @@ int main (int argc, char *argv[]) {
 	unsigned lTopologie = 350;
 	// Abstand zweier Knoten in m
 	unsigned deltaX = 50;
+	// Maximale Simulatorlaufzeit in s
+	unsigned maxTime = 75;
 	// Ausgabe-Ordner für die Tracing-Files
 	std::string outputDir = "";
 	std::string mp4traceDatei = "";
 
 	CommandLine cmd;
-	cmd.AddValue ("lTopologie", "Die Länge der Netzwerk-Topologie in m.", lTopologie);
-	cmd.AddValue ("deltaX", "Abstand zweier Knoten in m.", deltaX);
-	cmd.AddValue ("outputDir", "Ausgabe-Ordner für Tracing-Files", outputDir);
-	cmd.AddValue ("mp4TraceDatei", "mp4trace-Datei", mp4traceDatei);
-	cmd.Parse (argc, argv);
+	cmd.AddValue( "lTopologie", "Die Länge der Netzwerk-Topologie in m.", lTopologie );
+	cmd.AddValue( "deltaX", "Abstand zweier Knoten in m.", deltaX);
+	cmd.AddValue( "outputDir", "Ausgabe-Ordner für Tracing-Files", outputDir );
+	cmd.AddValue( "mp4TraceDatei", "mp4trace-Datei", mp4traceDatei);
+	cmd.AddValue( "maxTime", "Maximale Laufzeit des Simulators in s", maxTime );
+	cmd.Parse( argc, argv );
 
 	// Deaktivierung der Fragmentierung
 	Config::SetDefault("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue("6000"));
@@ -109,19 +112,19 @@ int main (int argc, char *argv[]) {
 	ApplicationContainer app;
 	app.Add(evalvidApp);
 	app.Start(Seconds(1.0));
-	app.Stop(Seconds(70.0));
+	app.Stop(Seconds(maxTime));
 
 	//Udp-Senke, da der Server eingehende Pakete nur annimmt und zusätzlich noch die Anzahl der erfolgreich empfangenen Pakete sich merkt
 	UdpServerHelper sinkApp = UdpServerHelper(9);
 	ApplicationContainer sinkApps = sinkApp.Install(nodes.Get(nNodes-1));
 	sinkApps.Start (Seconds (0.0));
-	sinkApps.Stop (Seconds (70.0));
+	sinkApps.Stop (Seconds (maxTime));
 
 	//Tracing aktivieren für alle Devices aller Knoten
 	wifiPhy.EnablePcap( outputDir + "aufgabeZwei", devices);
 
 	//Simulation
-	Simulator::Stop(Seconds(70.0));
+	Simulator::Stop(Seconds(maxTime));
 
 	Simulator::Run();
 	Simulator::Destroy();
