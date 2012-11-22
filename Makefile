@@ -48,7 +48,7 @@ $(OUTPUTDIR)/aufgabe1.pdf:
 $(OUTPUTDIR)/aufgabe2.pdf: $(MEAN_PSNR_PNG)
 	$(PDFLATEX) --output-directory=$(OUTPUTDIR) skripte/aufgabe2.tex
 	$(PDFLATEX) --output-directory=$(OUTPUTDIR) skripte/aufgabe2.tex
-	@rm -f $(OUTPUTDIR)/{aufgabe1.aux,aufgabe1.log}
+	@rm -f $(OUTPUTDIR)/{aufgabe2.aux,aufgabe2.log}
 
 $(OUTPUTDIR)/throughput.png: $(DATS)
 	DAT1=output/1-Hop.dat DAT4=output/4-Hop.dat DAT8=output/8-Hop.dat $(GNUPLOT) skripte/graph1.plt
