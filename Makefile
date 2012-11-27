@@ -83,7 +83,7 @@ $(ETMP4MP4): $(OUTPUTDIR)/%.mp4: $(MP4TRACES)
 	skripte/delete_aodv.awk $(basename $(call select_mp4trace,$@))_r.tcpdump.raw > $(basename $(call select_mp4trace,$@))_r.tcpdump
 	cd $(OUTPUTDIR) && \
 	$(ETMP4) -F -x $(basename $(call select_mp4trace,$@))_s.tcpdump $(basename $(call select_mp4trace,$@))_r.tcpdump $(call select_mp4trace,$@).mp4trace $(subst .mp4trace,.mp4,$(call select_mp4trace,$@).mp4trace) $(basename $(notdir $@)) >/dev/null 2>&1
-	rm -f $(OUTPUTDIR)/*.pcap
+# 	rm -f $(OUTPUTDIR)/*.pcap
 
 $(ETMP4YUF): $(OUTPUTDIR)/%.yuv: $(OUTPUTDIR)/%.mp4
 	$(FFMPEG) -i $< $@
