@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Hello World</title>
+		<title>Fingerprint</title>
 		<script type="text/javascript" src="PluginDetect_All.js"></script>
 	</head>
 <body>
@@ -16,7 +16,7 @@ print $_SERVER['HTTP_ACCEPT_ENCODING']."<br>";
 // check if cookies are enabled
 setcookie('test', 1, time()+3600);
 if(!isset($_GET['cookies'])){
-    header('Location:/fingerprint.php?cookies=true');
+    header('Location:' . $_SERVER['PHP_SELF'] . '?cookies=true');
 }
 if(count($_COOKIE) > 0){
     echo "Cookies enabled!<br>";
@@ -37,12 +37,41 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height']) AND is
 } else {
     echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?width="+screen.width+"&height="+screen.height+"&timezone="+new Date().getTimezoneOffset();</script>';
 }
-
 ?>
 <script type="text/javascript">
+function writeData(str)
+{
+if (str=="")
+  {
+  document.getElementById("testajax").innerHTML="";
+  return;
+  }
+
+  xmlhttp=new XMLHttpRequest();
+
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    document.getElementById("testajax").innerHTML=xmlhttp.responseText;
+    }
+  }
+xmlhttp.open("GET","writeData.php?w="+str,true);
+xmlhttp.send();
+}
+
 PluginDetect.getVersion(".");
-PluginDetect.getVersion("QuickTime");
-if (PluginDetect.isGecko)
-// 	alert("gecko!");
+document.write("Flash: " + PluginDetect.getVersion("Flash") + "<br>");
+document.write("Shockwave: " + PluginDetect.getVersion("Shockwave") + "<br>");
+document.write("AdobeReader: " + PluginDetect.getVersion("AdobeReader") + "<br>");
+document.write("WindowsMediaPlayer: " + PluginDetect.getVersion("WindowsMediaPlayer") + "<br>");
+document.write("VLC: " + PluginDetect.getVersion("VLC") + "<br>");
+document.write("Silverlight: " + PluginDetect.getVersion("Silverlight") + "<br>");
+document.write("Java: " + PluginDetect.getVersion("Java") + "<br>");
+document.write("DevalVR: " + PluginDetect.getVersion("DevalVR") + "<br>");
+
+writeData("Jummy!");
 </script>
+
+<div id="testajax"><b>No Ajax</b></div>
 </body></html>
