@@ -7,3 +7,8 @@ A1)
 A2)
 prerequisites: gpac, x264, x86_32 glibc, ffmpeg
 - run 'make aufgabe1'
+A3)
+prerequisites: httpd php mysql mysql-server php-mysql
+- run 'sudo service httpd start'
+- run 'sudo service mysqld start'
+- run 'sudo mysql -h localhost -u root -ptest'
