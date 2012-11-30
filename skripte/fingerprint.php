@@ -7,11 +7,11 @@
 	</head>
 <body>
 <?php
-print $_SERVER['HTTP_USER_AGENT']."<br>";
-print $_SERVER['HTTP_ACCEPT']."<br>";
-print $_SERVER['HTTP_ACCEPT_CHARSET']."<br>";
-print $_SERVER['HTTP_ACCEPT_LANGUAGE']."<br>";
-print $_SERVER['HTTP_ACCEPT_ENCODING']."<br>";
+echo "<div id='USERAGENT'>" . $_SERVER['HTTP_USER_AGENT'] . "</div>";
+echo "<div id='HTTPACCEPT'>" . $_SERVER['HTTP_ACCEPT'] . "</div>";
+echo "<div id='HTTPCHARSET'>" . $_SERVER['HTTP_ACCEPT_CHARSET'] . "</div>";
+echo "<div id='HTTPLANGUAGE'>" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "</div>";
+echo "<div id='HTTPENCODING'>" . $_SERVER['HTTP_ACCEPT_ENCODING'] . "</div>";
 
 // check if cookies are enabled
 setcookie('test', 1, time()+3600);
@@ -23,21 +23,14 @@ if(count($_COOKIE) > 0){
 } else {
     echo "Cookies not enabled!<br>";
 }
-
-// get screen resolution, timezone
-session_start();
-if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height']) AND isset($_SESSION['timezone'])){
-    echo 'User resolution: ' . $_SESSION['screen_width'] . 'x' . $_SESSION['screen_height'] . "<br>";
-    echo 'Timezone Offset: ' . $_SESSION['timezone'] . "<br>";
-} else if(isset($_REQUEST['width']) AND isset($_REQUEST['height']) AND isset($_REQUEST['timezone'])) {
-    $_SESSION['screen_width'] = $_REQUEST['width'];
-    $_SESSION['screen_height'] = $_REQUEST['height'];
-    $_SESSION['timezone'] = $_REQUEST['timezone'];
-    header('Location: ' . $_SERVER['PHP_SELF']);
-} else {
-    echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?width="+screen.width+"&height="+screen.height+"&timezone="+new Date().getTimezoneOffset();</script>';
-}
 ?>
+<object type="application/x-java-applet;version=1.4.1" name="jsap" id="jsap" width="0" height="0">
+	<param name="code" value="ListFonts.class">
+	<param name="scriptable" value="false">
+</object>
+
+<div id="testajax"><b>No Ajax</b></div>
+
 <script type="text/javascript">
 function writeData(str)
 {
@@ -61,17 +54,39 @@ xmlhttp.send();
 }
 
 PluginDetect.getVersion(".");
-document.write("Flash: " + PluginDetect.getVersion("Flash") + "<br>");
-document.write("Shockwave: " + PluginDetect.getVersion("Shockwave") + "<br>");
-document.write("AdobeReader: " + PluginDetect.getVersion("AdobeReader") + "<br>");
-document.write("WindowsMediaPlayer: " + PluginDetect.getVersion("WindowsMediaPlayer") + "<br>");
-document.write("VLC: " + PluginDetect.getVersion("VLC") + "<br>");
-document.write("Silverlight: " + PluginDetect.getVersion("Silverlight") + "<br>");
-document.write("Java: " + PluginDetect.getVersion("Java") + "<br>");
-document.write("DevalVR: " + PluginDetect.getVersion("DevalVR") + "<br>");
+
+var userAgent = document.getElementById("USERAGENT").innerHTML;
+var httpAccept = document.getElementById("HTTPACCEPT").innerHTML;
+var httpCharset = document.getElementById("HTTPCHARSET").innerHTML;
+var httpLanguage = document.getElementById("HTTPLANGUAGE").innerHTML;
+var httpEncoding = document.getElementById("HTTPENCODING").innerHTML;
+
+var tzoffset = new Date().getTimezoneOffset();
+var screenResolution = screen.width + "x" + screen.height;
+var flash = "Flash: " + PluginDetect.getVersion("Flash");
+var shockwave = "Shockwave: " + PluginDetect.getVersion("Shockwave");
+var adobeReader = "AdobeReader: " + PluginDetect.getVersion("AdobeReader");
+var windowsMediaPlayer = "WindowsMediaPlayer: " + PluginDetect.getVersion("WindowsMediaPlayer");
+var vlc = "VLC: " + PluginDetect.getVersion("VLC");
+var silverlight = "Silverlight: " + PluginDetect.getVersion("Silverlight");
+var java = "Java: " + PluginDetect.getVersion("Java");
+var devalvr = "DevalVR: " + PluginDetect.getVersion("DevalVR");
+var fonts = document.jsap.getFonts();
+
+document.write("Timezone: " + new Date().getTimezoneOffset() + "<br>");
+document.write("Screen res: " + screenResolution + "<br>");
+document.write(flash + "<br>");
+document.write(shockwave + "<br>");
+document.write(adobeReader + "<br>");
+document.write(windowsMediaPlayer + "<br>");
+document.write(vlc + "<br>");
+document.write(silverlight + "<br>");
+document.write(java + "<br>");
+document.write(devalvr + "<br>");
+document.write("Fonts: " + fonts + "<br>");
 
 writeData("Jummy!");
+
 </script>
 
-<div id="testajax"><b>No Ajax</b></div>
 </body></html>
