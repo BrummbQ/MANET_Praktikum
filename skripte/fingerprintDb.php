@@ -167,7 +167,8 @@ ENDE_SELECT_FINGERPRINT_ALL;
       $fonts = $this->getFonts($line[0]);
       $arrayPDiff = array_diff($fp['plugins'],$plugins);
       $arrayFDiff = array_diff($fp['fonts'],$fonts);
-      if (count($arrayPDiff) == 0 and count($arrayFDiff) == 0) return $line[0];
+      //nur bei 100% übereinstimmung wird dieselbe id zurückgegeben
+      if (count($arrayPDiff) == 0 and count($plugins) == count($fp['plugins']) and count($arrayFDiff) == 0 and count($fonts) == count($fp['fonts'])) return $line[0];
     };
     mysql_free_result($result);    
     return -1;
@@ -258,6 +259,26 @@ ENDE_SELECT_FINGERPRINT_ALL;
 
   
 }
+
+$fp['domLocal']=$_GET["domLocal"];
+$fp['domSession']=$_GET["domSession"];
+$fp['ieUserData']=$_GET["ieUserData"];
+$fp['plugins']=explode(", ",trim($_GET["plugins"],"[]"));
+$fp['fonts']=explode(", ",trim($_GET["fonts"],"[]"));
+$fp['userAgent']=$_GET["userAgent"];
+$fp['httpAccept']=$_GET["httpAccept"];
+$fp['httpAcceptLanguage']=$_GET["httpLanguage"];
+$fp['httpAcceptEncoding']=$_GET["httpEncoding"];
+$fp['httpAcceptCharset']=$_GET["httpCharset"];
+$fp['cookies']=$_GET["cookies"];
+$fp['screenResolution']= $_GET["screenResolution"];
+$fp['timezone']=$_GET["timezone"];
+
+
+$fpDb = new fingerprintDb;
+$resId = $fpDb->insertFingerprint($fp);
+$fpDb->printFingerprint($fp);
+$fpDb->printTimes($resId);
 
 ?>
 

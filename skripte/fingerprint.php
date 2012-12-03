@@ -6,12 +6,13 @@
 		<script type="text/javascript" src="PluginDetect_All.js"></script>
 	</head>
 <body>
+<div id="testajax"><b>Kein Javascript, zum Ausführen der Seite aktivieren Sie bitte Javascript.</b></div>
 <?php
-echo "<div id='USERAGENT'>" . $_SERVER['HTTP_USER_AGENT'] . "</div>";
-echo "<div id='HTTPACCEPT'>" . $_SERVER['HTTP_ACCEPT'] . "</div>";
-echo "<div id='HTTPCHARSET'>" . $_SERVER['HTTP_ACCEPT_CHARSET'] . "</div>";
-echo "<div id='HTTPLANGUAGE'>" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "</div>";
-echo "<div id='HTTPENCODING'>" . $_SERVER['HTTP_ACCEPT_ENCODING'] . "</div>";
+echo "<div id='USERAGENT' style='visibility:hidden'>" . $_SERVER['HTTP_USER_AGENT'] . "</div>";
+echo "<div id='HTTPACCEPT' style='visibility:hidden'>" . $_SERVER['HTTP_ACCEPT'] . "</div>";
+echo "<div id='HTTPCHARSET' style='visibility:hidden'>" . $_SERVER['HTTP_ACCEPT_CHARSET'] . "</div>";
+echo "<div id='HTTPLANGUAGE' style='visibility:hidden'>" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "</div>";
+echo "<div id='HTTPENCODING' style='visibility:hidden'>" . $_SERVER['HTTP_ACCEPT_ENCODING'] . "</div>";
 
 // check if cookies are enabled
 setcookie('test', 1, time()+3600);
@@ -19,38 +20,45 @@ if(!isset($_GET['cookies'])){
     header('Location:' . $_SERVER['PHP_SELF'] . '?cookies=true');
 }
 if(count($_COOKIE) > 0){
-    echo "Cookies enabled!<br>";
+    echo "<div id='COOKIES'  style='visibility:hidden'>1</div>";
 } else {
-    echo "Cookies not enabled!<br>";
+    echo "<div id='COOKIES'  style='visibility:hidden'>0</div>";
 }
 ?>
+
 <object type="application/x-java-applet;version=1.4.1" name="jsap" id="jsap" width="0" height="0">
 	<param name="code" value="ListFonts.class">
 	<param name="scriptable" value="false">
 </object>
 
-<div id="testajax"><b>No Ajax</b></div>
-
 <script type="text/javascript">
 function writeData(str)
 {
-if (str=="")
+
+  if (str=="")
   {
-  document.getElementById("testajax").innerHTML="";
-  return;
+    document.getElementById("testajax").innerHTML="";
+    return;
+  }
+  var xmlhttp;
+  if (window.XMLHttpRequest) 
+  {
+    xmlhttp = new XMLHttpRequest();
+  } 
+  else if (window.ActiveXObject) {
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
   }
 
-  xmlhttp=new XMLHttpRequest();
-
-xmlhttp.onreadystatechange=function()
+  xmlhttp.onreadystatechange=function()
   {
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
-    document.getElementById("testajax").innerHTML=xmlhttp.responseText;
+      document.getElementById("testajax").innerHTML=xmlhttp.responseText;
     }
   }
-xmlhttp.open("GET","writeData.php?w="+str,true);
-xmlhttp.send();
+  
+  xmlhttp.open("GET","fingerprintDb.php?"+str,true);
+  xmlhttp.send();
 }
 
 PluginDetect.getVersion(".");
@@ -60,32 +68,73 @@ var httpAccept = document.getElementById("HTTPACCEPT").innerHTML;
 var httpCharset = document.getElementById("HTTPCHARSET").innerHTML;
 var httpLanguage = document.getElementById("HTTPLANGUAGE").innerHTML;
 var httpEncoding = document.getElementById("HTTPENCODING").innerHTML;
+var cookies = document.getElementById("COOKIES").innerHTML;
 
 var tzoffset = new Date().getTimezoneOffset();
-var screenResolution = screen.width + "x" + screen.height;
-var flash = "Flash: " + PluginDetect.getVersion("Flash");
-var shockwave = "Shockwave: " + PluginDetect.getVersion("Shockwave");
-var adobeReader = "AdobeReader: " + PluginDetect.getVersion("AdobeReader");
-var windowsMediaPlayer = "WindowsMediaPlayer: " + PluginDetect.getVersion("WindowsMediaPlayer");
-var vlc = "VLC: " + PluginDetect.getVersion("VLC");
-var silverlight = "Silverlight: " + PluginDetect.getVersion("Silverlight");
-var java = "Java: " + PluginDetect.getVersion("Java");
-var devalvr = "DevalVR: " + PluginDetect.getVersion("DevalVR");
-var fonts = document.jsap.getFonts();
+var screenResolution = screen.width + "x" + screen.height + "x"+screen.colorDepth;
 
-document.write("Timezone: " + new Date().getTimezoneOffset() + "<br>");
-document.write("Screen res: " + screenResolution + "<br>");
-document.write(flash + "<br>");
-document.write(shockwave + "<br>");
-document.write(adobeReader + "<br>");
-document.write(windowsMediaPlayer + "<br>");
-document.write(vlc + "<br>");
-document.write(silverlight + "<br>");
-document.write(java + "<br>");
-document.write(devalvr + "<br>");
-document.write("Fonts: " + fonts + "<br>");
+var pluginsList = new Array("Flash", "Shockwave", "AdobeReader", "WindowsMediaPlayer", "VLC", "Silverlight", "Java", "DevalVR");
+var activePlugins = "";
+for (var i=0; i< pluginsList.length; i++) {
+    var version = PluginDetect.getVersion(pluginsList[i]);
+    if (version != null) {
+      activePlugins = activePlugins + (activePlugins.length > 0 ? ", " : "") + pluginsList[i] + " " + version;
+    }
+}
 
-writeData("Jummy!");
+var javaActiv = PluginDetect.getVersion("Java") ? true : false;
+//nur ausführen, wenn Java aktiv ist
+var fonts = "";
+if (javaActiv) {
+  var fonts = document.jsap.getFonts();
+}
+
+var localStorageActive = 0;
+var sessionStorageActive = 0;
+var ieUserData = 0;
+//supercookies
+try {
+    localStorage.setItem("fingerprint", "test");
+    sessionStorage.setItem("fingerprint", "test");
+} catch (ex) { }
+
+try {
+  if (localStorage.getItem("fingerprint") == "test") {
+    localStorageActive = 1;
+  } 
+} catch (ex) {  }
+
+try {
+  if (sessionStorage.getItem("fingerprint") == "test") {
+    sessionStorageActive = 1;
+  } 
+} catch (ex) { }
+
+
+try {
+  oPersistDiv.setAttribute("remember", "remember this value");
+  oPersistDiv.save("oXMLStore");
+  oPersistDiv.setAttribute("remember", "overwritten!");
+  oPersistDiv.load("oXMLStore");
+  if ("remember this value" == (oPersistDiv.getAttribute("remember"))) {
+    ieUserData = 1;
+  }
+} catch (ex) { }
+
+
+writeData("userAgent=" + escape(userAgent) 
+  + "&httpAccept=" + escape(httpAccept)
+  + "&httpCharset=" + escape(httpCharset)
+  + "&httpLanguage=" + escape(httpLanguage)
+  + "&httpEncoding=" + escape(httpEncoding)
+  + "&timezone=" + escape(tzoffset)
+  + "&screenResolution=" + escape(screenResolution)
+  + "&cookies=" + escape(cookies)
+  + "&plugins=" + escape("["+activePlugins+"]")
+  + "&fonts=" + escape(fonts)
+  + "&domLocal=" + escape(localStorageActive)
+  + "&domSession=" + escape(sessionStorageActive)
+  + "&ieUserData=" + escape(ieUserData));
 
 </script>
 
