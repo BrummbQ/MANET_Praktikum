@@ -1,0 +1,78 @@
+\documentclass[12pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\lstset{frame=trBL}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\setlength{\parindent}{0pt} 
+
+
+\begin{document}
+\title{Praktikum Mobile AdHocNetze\\
+	Aufgabe 3: Device Fingerprinting}
+\author{
+Bearbeiter: \and
+	Andy Labitzke, labitzke@studserv.uni-leipzig.de \\ 
+	Gregor Tätzner, wir08ehh@studserv.uni-leipzig.de}
+\date{09.12.2012}
+\maketitle
+\setcounter{page}{1}
+\appendix
+
+\section*{Inhalt}
+In diesem Dokument beschreiben wir die Lösung der 3. Praktikumsaufgabe. Die Gliederung orientiert sich an den einzelnen Unteraufgaben des vorgegebenen Arbeitsblattes.
+
+\setcounter{section}{0}
+
+\section{Installation der PHP Skripte und des MySQL Schemas}
+
+Zunächst muss der Apache httpd Webserver und die MySQL Datenbank installiert und gestartet werden. Das Datenbankschema wird mit:
+\begin{lstlisting}
+mysql -h localhost -u fingerprintacc -pfingerprint < fingerprint.sql
+\end{lstlisting}
+installiert. Vorher muss der Account "`fingerprintacc"' angelegt werden.
+
+Nun können die PHP-Skripte in den \textit{webroot} des Webservers kopiert werden. Nach Aufruf der Addresse \textit{http://localhost/skripte/fingerprint.php} sollte der Fingerprint des eigenen Browsers angezeigt werden.
+
+\section{Erkennung der Browser-Merkmale}
+
+Das Skript \textit{fingerprint.php} erkennt mit PHP, JavaScript und einem Java-Applet die in Tabelle \ref{table-fp} aufgeführten Merkmale. Dabei testet PluginDetect auf folgende Browser-Plugins: \textit{Flash, Shockwave, AdobeReader, WindowsMediaPlayer, VLC, Silverlight, Java, DevalVR}.
+
+\begin{table}
+\centering
+ \begin{tabular}{|l|l|}
+ \hline
+ Merkmal & Quelle \\
+ \hline
+ HTTP\_USER\_AGENT & HTTP Header \\
+ HTTP\_ACCEPT & HTTP Header \\
+ HTTP\_ACCEPT\_CHARSET & HTTP Header \\
+ HTTP\_ACCEPT\_LANGUAGE & HTTP Header \\
+ HTTP\_ACCEPT\_ENCODING & HTTP Header \\
+ \hline
+ COOKIES & PHP \\
+ \hline
+ Screen resolution & JavaScript \\
+ Timezone & JavaScript \\
+ Local storage & JavaScript \\
+ Session storage & JavaScript \\
+ Session storage (IE only) & JavaScript \\
+ Browser-Plugins & PluginDetect(JavaScript) \\
+ \hline
+ Fonts & Java-Applet \\
+ \hline
+  
+ \end{tabular} 
+\caption{Browsermerkmale}
+\label{table-fp} 
+\end{table}
+
+\section{MySQL Anbindung und Zugriffshistorie}
+
+Die ermittelten Daten werden dem PHP-Skript "`fingerprintDb.php"' übergeben. Hier erfolgt für jeden Seitenzugriff ein Vergleich des ermittelten Datensatzes (Array mit den Feldern aus Tabelle \ref{table-fp}) mit den bereits in den Tabellen befindlichen Aufzeichnungen. Bei einer Übereinstimmung von 100\% werden nur die Zeitpunkte der letzten Zugriffe zurückgegeben und angezeigt. In diesem Fall hat ein Client die Seite wahrscheinlich bereits besucht. Falls der Datensatz neu ist, wird er mit einer neuen ID in die Datenbank aufgenommen.
+
+\end{document}

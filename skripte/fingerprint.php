@@ -6,7 +6,7 @@
 		<script type="text/javascript" src="PluginDetect_All.js"></script>
 	</head>
 <body>
-<div id="testajax"><b>Kein Javascript, zum Ausführen der Seite aktivieren Sie bitte Javascript.</b></div>
+<div id="fpresult"><b>Kein Javascript, zum Ausführen der Seite aktivieren Sie bitte Javascript.</b></div>
 <?php
 echo "<div id='USERAGENT' style='visibility:hidden'>" . $_SERVER['HTTP_USER_AGENT'] . "</div>";
 echo "<div id='HTTPACCEPT' style='visibility:hidden'>" . $_SERVER['HTTP_ACCEPT'] . "</div>";
@@ -37,14 +37,13 @@ function writeData(str)
 
   if (str=="")
   {
-    document.getElementById("testajax").innerHTML="";
     return;
   }
   var xmlhttp;
-  if (window.XMLHttpRequest) 
+  if (window.XMLHttpRequest)
   {
     xmlhttp = new XMLHttpRequest();
-  } 
+  }
   else if (window.ActiveXObject) {
     xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
   }
@@ -53,10 +52,10 @@ function writeData(str)
   {
     if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
-      document.getElementById("testajax").innerHTML=xmlhttp.responseText;
+      document.getElementById("fpresult").innerHTML=xmlhttp.responseText;
     }
   }
-  
+
   xmlhttp.open("GET","fingerprintDb.php?"+str,true);
   xmlhttp.send();
 }
@@ -101,13 +100,13 @@ try {
 try {
   if (localStorage.getItem("fingerprint") == "test") {
     localStorageActive = 1;
-  } 
+  }
 } catch (ex) {  }
 
 try {
   if (sessionStorage.getItem("fingerprint") == "test") {
     sessionStorageActive = 1;
-  } 
+  }
 } catch (ex) { }
 
 
@@ -122,7 +121,7 @@ try {
 } catch (ex) { }
 
 
-writeData("userAgent=" + escape(userAgent) 
+writeData("userAgent=" + escape(userAgent)
   + "&httpAccept=" + escape(httpAccept)
   + "&httpCharset=" + escape(httpCharset)
   + "&httpLanguage=" + escape(httpLanguage)
